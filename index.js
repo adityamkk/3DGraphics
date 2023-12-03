@@ -45,7 +45,7 @@ class Plotter {
         let coord3 = this.convCoord(x3, y3);
         this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         this.ctx.lineWidth = 0.1;
-        //this.ctx.fillStyle = color;
+        this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(coord1[0], coord1[1]);
         this.ctx.lineTo(coord2[0], coord2[1]);
@@ -53,7 +53,7 @@ class Plotter {
         this.ctx.lineTo(coord1[0], coord1[1]);
         this.ctx.stroke();
         this.ctx.closePath();
-        //this.ctx.fill();
+        this.ctx.fill();
     }
 
     //Helper method

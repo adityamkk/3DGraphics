@@ -5,3 +5,5 @@
 Accepts STL files as inputs and renders a colored mesh.
 
 Supports limited camera movement, including left, right, up, and down movement, as well as a zoom.
+
+![eiffel tower](http://admkk.com/images/graphics.png)

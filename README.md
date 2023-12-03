@@ -2,4 +2,4 @@
 
 3D Graphics rendering using JavaScript canvas.
 
-![red cube](http://admkk.com/images/graphics.png)
+![eiffel tower](http://admkk.com/images/graphics.png)

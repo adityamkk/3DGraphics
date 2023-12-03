@@ -1,8 +1,10 @@
 //Constants and Variables
 const canvas = document.querySelector(".myCanvas");
 const width = canvas.width = window.innerWidth;
-const height = canvas.height = window.innerHeight;
+const height = canvas.height = window.innerHeight - document.getElementById("file-selector").offsetHeight;
 const ctx = canvas.getContext('2d');
+
+let scale = 1;
 
 // Classes
 
@@ -42,14 +44,16 @@ class Plotter {
         let coord2 = this.convCoord(x2, y2);
         let coord3 = this.convCoord(x3, y3);
         this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-        this.ctx.fillStyle = color;
+        this.ctx.lineWidth = 0.1;
+        //this.ctx.fillStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(coord1[0], coord1[1]);
         this.ctx.lineTo(coord2[0], coord2[1]);
         this.ctx.lineTo(coord3[0], coord3[1]);
         this.ctx.lineTo(coord1[0], coord1[1]);
+        this.ctx.stroke();
         this.ctx.closePath();
-        this.ctx.fill();
+        //this.ctx.fill();
     }
 
     //Helper method
@@ -172,18 +176,63 @@ function findUnitsCamera(cameraVector) {
     return [i, j, k];
 }
 
+function generateTrianglesFromFile(file) {
+    const reader = new FileReader();
+    let triangles = [];
+
+    reader.readAsText(file);
+
+    reader.addEventListener("load", () => {
+        let output = reader.result;
+        let outputWords = output.split(/\s+/);
+        for(let i = 0; i < outputWords.length; i++) {
+            if(outputWords[i] === "facet") {
+                triangles.push(new Triangle(new Vector3(Number(outputWords[i+8]), Number(outputWords[i+9]), Number(outputWords[i+10])), new Vector3(Number(outputWords[i+12]), Number(outputWords[i+13]), Number(outputWords[i+14])), new Vector3(Number(outputWords[i+16]), Number(outputWords[i+17]), Number(outputWords[i+18])), 0, 0, 255, 0.3));
+            }
+        }
+        console.log(triangles);
+        plotShapes(plotter, camera, triangles);
+    });
+    return triangles;
+}
+
 // Execution
 
 let myVs = [new Vector3(100, 500, 300), new Vector3(100, 500, 500), new Vector3(100, 300, 300), new Vector3(100, 300, 500), new Vector3(-100, 500, 300), new Vector3(-100, 500, 500), new Vector3(-100, 300, 300), new Vector3(-100, 300, 500)];
 
+
 let myTriangles = [
-    new Triangle(new Vector3(100, 500, 300), new Vector3(100, 500, 500), new Vector3(100, 300, 300), 255, 0, 0, 0.75), new Triangle(new Vector3(100, 300, 300), new Vector3(100, 500, 500), new Vector3(100, 300, 500), 255, 0, 0, 0.75), 
-    new Triangle(new Vector3(-100, 500, 300), new Vector3(-100, 500, 500), new Vector3(-100, 300, 300), 255, 0, 0, 0.75), new Triangle(new Vector3(-100, 300, 300), new Vector3(-100, 500, 500), new Vector3(-100, 300, 500), 255, 0, 0, 0.75),
-    new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 300, 300), new Vector3(-100, 300, 500), 255, 0, 0, 0.5), new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 300, 500), new Vector3(100, 300, 500), 255, 0, 0, 0.5),
-    new Triangle(new Vector3(100, 500, 300), new Vector3(-100, 500, 300), new Vector3(-100, 500, 500), 255, 0, 0, 0.5), new Triangle(new Vector3(100, 500, 300), new Vector3(-100, 500, 500), new Vector3(100, 500, 500), 255, 0, 0, 0.5),
-    new Triangle(new Vector3(100, 300, 300), new Vector3(100, 500, 300), new Vector3(-100, 500, 300), 255, 0, 0, 0.4), new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 500, 300), new Vector3(-100, 300, 300), 255, 0, 0, 0.4),
-    new Triangle(new Vector3(100, 300, 500), new Vector3(100, 500, 500), new Vector3(-100, 500, 500), 255, 0, 0, 0.4), new Triangle(new Vector3(100, 300, 500), new Vector3(-100, 500, 500), new Vector3(-100, 300, 500), 255, 0, 0, 0.4),
+    new Triangle(new Vector3(100, 500, 300), new Vector3(100, 500, 500), new Vector3(100, 300, 300), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(100, 300, 300), new Vector3(100, 500, 500), new Vector3(100, 300, 500), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(-100, 500, 300), new Vector3(-100, 500, 500), new Vector3(-100, 300, 300), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(-100, 300, 300), new Vector3(-100, 500, 500), new Vector3(-100, 300, 500), 255, 0, 0, 0.75),
+    new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 300, 300), new Vector3(-100, 300, 500), 255, 0, 0, 0.5), 
+    new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 300, 500), new Vector3(100, 300, 500), 255, 0, 0, 0.5),
+    new Triangle(new Vector3(100, 500, 300), new Vector3(-100, 500, 300), new Vector3(-100, 500, 500), 255, 0, 0, 0.5), 
+    new Triangle(new Vector3(100, 500, 300), new Vector3(-100, 500, 500), new Vector3(100, 500, 500), 255, 0, 0, 0.5),
+    new Triangle(new Vector3(100, 300, 300), new Vector3(100, 500, 300), new Vector3(-100, 500, 300), 255, 0, 0, 0.4), 
+    new Triangle(new Vector3(100, 300, 300), new Vector3(-100, 500, 300), new Vector3(-100, 300, 300), 255, 0, 0, 0.4),
+    new Triangle(new Vector3(100, 300, 500), new Vector3(100, 500, 500), new Vector3(-100, 500, 500), 255, 0, 0, 0.4), 
+    new Triangle(new Vector3(100, 300, 500), new Vector3(-100, 500, 500), new Vector3(-100, 300, 500), 255, 0, 0, 0.4),
 ]
+
+
+/*
+let myTriangles = [
+    new Triangle(new Vector3(-3.5, 6, 2), new Vector3(-5.5, 6, 2), new Vector3(-3.5, 4, 2), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(-3.5, 4, 2), new Vector3(-5.5, 6, 2), new Vector3(-5.5, 4, 2), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(-3.5, 4, 0), new Vector3(-5.5, 4, 0), new Vector3(-3.5, 6, 0), 255, 0, 0, 0.75), 
+    new Triangle(new Vector3(-3.5, 6, 0), new Vector3(-5.5, 4, 0), new Vector3(-5.5, 6, 0), 255, 0, 0, 0.75),
+    new Triangle(new Vector3(-5.5, 4, 2), new Vector3(-5.5, 4, 0), new Vector3(-3.5, 4, 2), 255, 0, 0, 0.5), 
+    new Triangle(new Vector3(-3.5, 4, 2), new Vector3(-5.5, 4, 0), new Vector3(-3.5, 4, 0), 255, 0, 0, 0.5),
+    new Triangle(new Vector3(-5.5, 6, 2), new Vector3(-5.5, 6, 0), new Vector3(-5.5, 4, 2), 255, 0, 0, 0.5), 
+    new Triangle(new Vector3(-5.5, 4, 2), new Vector3(-5.5, 6, 0), new Vector3(-5.5, 4, 0), 255, 0, 0, 0.5),
+    new Triangle(new Vector3(-3.5, 6, 2), new Vector3(-3.5, 6, 0), new Vector3(-5.5, 6, 2), 255, 0, 0, 0.4), 
+    new Triangle(new Vector3(-5.5, 6, 2), new Vector3(-3.5, 6, 0), new Vector3(-5.5, 6, 0), 255, 0, 0, 0.4),
+    new Triangle(new Vector3(-3.5, 4, 2), new Vector3(-3.5, 4, 0), new Vector3(-3.5, 6, 2), 255, 0, 0, 0.4), 
+    new Triangle(new Vector3(-3.5, 6, 2), new Vector3(-3.5, 4, 0), new Vector3(-3.5, 6, 0), 255, 0, 0, 0.4),
+]
+*/
 
 //Vector.mul(1/Math.sqrt(13), new Vector3(3, 4, 12)), Vector.mul(1/5, new Vector3(-4, 3, 0)), Vector.mul(1/65, new Vector3(-36, -48, 25))
 let cameraVector = new Vector3(5, 8, 4);
@@ -222,14 +271,19 @@ function plotShapes(myPlotter, camera, triangles) {
     */
 
     for(let i = 0; i < triangles.length; i++) {
-        newV1 = Vector.rREF(camera, triangles[i].v1);
-        newV2 = Vector.rREF(camera, triangles[i].v2);
-        newV3 = Vector.rREF(camera, triangles[i].v3);
+        newV1 = Vector.rREF(camera, Vector.mul(scale, triangles[i].v1));
+        newV2 = Vector.rREF(camera, Vector.mul(scale, triangles[i].v2));
+        newV3 = Vector.rREF(camera, Vector.mul(scale, triangles[i].v3));
         myPlotter.plotTri(newV1.j, newV1.k, newV2.j, newV2.k, newV3.j, newV3.k, triangles[i].rgba());
     }
 }
 
-plotShapes(plotter, camera, myTriangles);
+plotShapes(plotter, camera, myTriangles); // Pass triangles in here
+
+document.getElementById('file-selector').addEventListener('change', (event) =>  {
+    const file = event.target.files[0];
+    myTriangles = generateTrianglesFromFile(file);
+});
 
 document.addEventListener("keydown", (event) => {
     console.log(event.code);
@@ -254,4 +308,10 @@ document.addEventListener("keydown", (event) => {
         camera = new Matrix(...findUnitsCamera(cameraVector));
         plotShapes(plotter, camera, myTriangles);
     }
+});
+
+document.addEventListener("wheel", (event) => {
+    console.log(event.deltaY);
+    scale *= 1+event.deltaY*0.002;
+    plotShapes(plotter, camera, myTriangles);
 });
